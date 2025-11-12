@@ -238,10 +238,10 @@ instance FromJSON Commit
 instance FromJSON JetstreamMsg
 
 consume :: Connection -> ReaderT Env IO ()
-consume conn = forever $ do
-    lift $ do
-        msg <- receiveData conn
-        print $ (decode msg :: Maybe JetstreamMsg)
+consume conn = return () --forever $ do
+    --lift $ do
+    --    msg <- receiveData conn
+    --    print $ (decode msg :: Maybe JetstreamMsg)
 
 -- atproto service auth
 authHandler :: AuthHandler Request Did
@@ -263,8 +263,9 @@ authHandler = mkAuthHandler handler
                 unsafeGetJWTClaimsSet jwt
             claims' <- left401 "bad jwt" (claims :: Either JWTError ClaimsSet)
 
-            iss <- or401 "no iss" $ claims' ^. claimIss
-            or401 "bad iss" $ preview string iss >>= parseDid
+            issClaim <- or401 "no iss claim" $ claims' ^. claimIss
+            iss <- or401 "no iss" $ preview Crypto.JWT.uri issClaim
+            or401 "bad iss" $ parseDid . pack . show $ iss
 
 authServerContext :: Servant.Context (AuthHandler Request Did ': '[])
 authServerContext = authHandler :. EmptyContext
