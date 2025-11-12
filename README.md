@@ -66,7 +66,10 @@ The default command if you enter none is `+ +rt` (following someone and their re
      "policies": {
        "labelValues": []
      },
-     "reasonTypes": ["tools.ozone.report.defs#reasonOther"],
+     "reasonTypes": [
+       "com.atproto.moderation.defs#reasonOther",
+       "tools.ozone.report.defs#reasonOther"
+     ],
      "createdAt": "2025-11-11T00:00:00.000Z"
    }
    ```
