@@ -265,7 +265,7 @@ data SkeletonFeedPost = SkeletonFeedPost
 
 data FeedSkeleton = FeedSkeleton
     { feed :: [SkeletonFeedPost]
-    , cursor :: Integer
+    , cursor :: Text
     } deriving (Generic, Show)
 
 instance ToJSON FeedReason where
@@ -391,8 +391,8 @@ xrpc did = getFeedSkeleton :<|> createReport
             return $ FeedSkeleton {
                 feed = postDBToSkeleton <$> dbPosts,
                 cursor = case unsnoc dbPosts of
-                    Just (_,p) -> p.ts
-                    Nothing -> 0
+                    Just (_,p) -> pack . show $ p.ts
+                    Nothing -> "0"
             }
 
         createReport :: ReportReq -> EnvHandler ReportRes
