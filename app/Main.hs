@@ -7,6 +7,9 @@ import Control.Monad.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.Trans (lift)
 import Control.Monad.IO.Class (liftIO)
 
+import Data.Maybe (fromMaybe)
+import Data.List (unsnoc)
+
 import GHC.Generics (Generic)
 
 import Network.WebSockets (Connection, receiveData)
@@ -14,6 +17,7 @@ import qualified Wuss
 
 import Data.Aeson
 import Data.Aeson.Types (Parser)
+
 import Data.Char (toLower)
 import Data.Text (Text, stripPrefix, split, words, pack)
 import qualified Data.ByteString as BS
@@ -22,6 +26,7 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Database.SQLite.Simple as SQL
 import Database.SQLite.Simple.FromRow
 import Database.SQLite.Simple.ToField
+import Database.SQLite.Simple.QQ (sql)
 
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -40,6 +45,9 @@ data Env = Env
     }
 
 type App = ReaderT Env IO
+
+liftH :: App a -> EnvHandler a
+liftH a = ask >>= liftIO . runReaderT a
 
 -- database types: see schema.sql
 data DBPost = DBPost
@@ -77,6 +85,57 @@ instance SQL.ToRow DBFollow where
         , toField $ reposts follow
         ]
 
+-- db queries
+getPosts :: Did -> Integer -> Integer -> App [DBPost]
+getPosts user cursor limit = do
+    conn <- db <$> ask
+    liftIO $ SQL.query conn [sql|
+        SELECT feed, rt, aturi, ts
+        FROM posts
+        WHERE feed = ? AND ts < ?
+        ORDER BY ts DESC
+        LIMIT ?
+        |] (encodeDid user, cursor, limit)
+
+ingestRecord :: Integer -> AtUri -> Record -> App ()
+ingestRecord _ _ UnknownRecord = return ()
+
+ingestRecord ts aturi@(AtUri rter _ _) (RepostRecord (Ref post)) = do
+    conn <- db <$> ask
+    liftIO $ SQL.execute conn [sql|
+        INSERT OR IGNORE INTO posts(feed, rt, aturi, ts)
+        SELECT follower, ?, ?, ?
+        FROM follows
+        WHERE followee = ? AND reposts = 1
+        |] (encodeAtUri aturi, encodeAtUri post, ts, encodeDid rter)
+
+ingestRecord ts aturi@(AtUri poster _ _) (PostRecord Nothing) = do
+    conn <- db <$> ask
+    liftIO $ SQL.execute conn [sql|
+        INSERT OR IGNORE INTO posts(feed, aturi, ts)
+        SELECT follower, ?, ?
+        FROM follows
+        WHERE followee = ? AND posts = 1
+        |] (encodeAtUri aturi, ts, encodeDid poster)
+
+ingestRecord ts aturi@(AtUri replier _ _) (PostRecord (Just (ReplyRef parent _))) = do
+    conn <- db <$> ask
+    let (Ref (AtUri repliee _ _)) = parent
+
+    liftIO $ do
+        SQL.execute conn [sql|
+            INSERT OR IGNORE INTO posts(feed, aturi, ts)
+            SELECT follower, ?, ?
+            FROM follows
+            WHERE followee = ? AND replies = 1
+            |] (encodeAtUri aturi, ts, encodeDid replier)
+        SQL.execute conn [sql|
+            INSERT OR IGNORE INTO posts(feed, aturi, ts)
+            SELECT follower, ?, ?
+            FROM follows
+            WHERE followee = ? AND replies_to = 1
+            |] (encodeAtUri aturi, ts, encodeDid repliee)
+
 -- parsing utils
 lowercaseFirst :: String -> String
 lowercaseFirst [] = []
@@ -96,7 +155,7 @@ maybeToParser v = case v of
 
 -- basic atproto types
 data Did = DidPlc Text | DidWeb Text
-    deriving (Show)
+    deriving (Show, Eq)
 
 parseDid :: Text -> Maybe Did
 parseDid (stripPrefix "did:plc:" -> Just v) = Just $ DidPlc v
@@ -199,6 +258,12 @@ instance ToJSON SkeletonFeedPost where
 instance ToJSON FeedSkeleton where
     toEncoding = genericToEncoding defaultOptions
 
+postDBToSkeleton :: DBPost -> SkeletonFeedPost
+postDBToSkeleton p = SkeletonFeedPost {
+        post = p.aturi,
+        reason = SkeletonReasonRepost <$> p.rt
+    }
+
 -- lexicon types: reporting
 data ReportReq = ReportReq
     { reasonType :: Text
@@ -219,7 +284,6 @@ instance FromJSON ReportReq
 instance ToJSON ReportRes where
     toEncoding = genericToEncoding defaultOptions
 
-
 -- jetstream consumer
 data Commit = Commit
     { operation :: Text
@@ -229,7 +293,7 @@ data Commit = Commit
     } deriving (Generic, Show)
 
 data JetstreamMsg = JetstreamMsg
-    { did :: Text
+    { did :: Did
     , time_us :: Integer
     , commit :: Commit
     } deriving (Generic, Show)
@@ -237,11 +301,17 @@ data JetstreamMsg = JetstreamMsg
 instance FromJSON Commit
 instance FromJSON JetstreamMsg
 
-consume :: Connection -> ReaderT Env IO ()
-consume conn = return () --forever $ do
-    --lift $ do
-    --    msg <- receiveData conn
-    --    print $ (decode msg :: Maybe JetstreamMsg)
+consume :: Connection -> App ()
+consume conn = forever $ do
+    msg <- liftIO $ receiveData conn
+    case (decode msg :: Maybe JetstreamMsg) of
+        Nothing -> return ()
+        Just j -> case j.commit of
+            (Commit "create" coll rkey (Just record)) -> do
+                if j.did == DidPlc "nw7wouh4kxrozfmvlzcf36kl" then liftIO $ print j else return ()
+                ingestRecord j.time_us (AtUri j.did coll rkey) record
+            _ -> return ()
+
 
 -- atproto service auth
 authHandler :: AuthHandler Request Did
@@ -296,12 +366,13 @@ xrpc :: Did -> ServerT XRPC EnvHandler
 xrpc did = getFeedSkeleton :<|> createReport
     where
         getFeedSkeleton :: Maybe Integer -> Maybe Integer -> EnvHandler FeedSkeleton
-        getFeedSkeleton cursor limit = return
-            FeedSkeleton {
-                feed = [
-                    SkeletonFeedPost {post="at://did:plc:5kr7qxme46hlriffmq3k74rj/app.bsky.feed.post/3m4nuy5vdgdl2", reason=Nothing}
-                ],
-                cursor = 0
+        getFeedSkeleton cursor limit = do
+            dbPosts <- liftH $ getPosts did (fromMaybe 99999999999999999 cursor) (fromMaybe 50 limit)
+            return $ FeedSkeleton {
+                feed = postDBToSkeleton <$> dbPosts,
+                cursor = case unsnoc dbPosts of
+                    Just (_,p) -> p.ts
+                    Nothing -> 0
             }
 
         createReport :: ReportReq -> EnvHandler ReportRes

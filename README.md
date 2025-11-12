@@ -24,6 +24,7 @@ The default command if you enter none is `+ +rt` (following someone and their re
 ## TODO
 
 - Save jetstream cursor
+- Handle deletes
 - Verify service auth JWTs
 - Prune inactive users
 

@@ -30,5 +30,6 @@ executable priv
                       , OverloadedRecordDot
                       , ViewPatterns
                       , TypeFamilies
+                      , QuasiQuotes
     ghc-options:        -Wall -O2
     ld-options:         -static -pthread
