@@ -23,10 +23,9 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
 ## TODO
 
-- [ ] Save jetstream cursor
-- [ ] Verify service auth JWTs
-  - [ ] PR cocoon with the `getFeed` hack?
-- [ ] Prune inactive users
+- Save jetstream cursor
+- Verify service auth JWTs
+- Prune inactive users
 
 ## Deploying
 
@@ -36,7 +35,7 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
 1. Create a main DID for the "labeler" and Bluesky account. You can do this through your PDS.
 
-   **Config** `mainDid`: `did:plc:...`
+   **Config** `mainDid`: `did:plc:hrxxvz6q4u67z4puuyek4qpt`
 
 1. Add the `atproto_labeler` service to your main DID. You can do this through `goat plc` or `goat account plc`.
 
@@ -44,7 +43,7 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
 1. Start your instance!
 
-1. Create the `app.bsky.labeler.service` labeler definition record:
+1. Create the `app.bsky.labeler.service` labeler definition record, e.g.:
 
    ```json
    {
@@ -57,7 +56,7 @@ The default command if you enter none is `+ +rt` (following someone and their re
    }
    ```
 
-1. Create the `app.bsky.feed.generator` feed generator definition record:
+1. Create the `app.bsky.feed.generator` feed generator definition record, e.g.:
 
    ```json
    {
