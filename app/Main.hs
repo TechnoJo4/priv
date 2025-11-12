@@ -4,7 +4,6 @@ import Control.Concurrent (forkIO)
 import Control.Lens ((^.), preview)
 import Control.Monad (forever, void, mzero)
 import Control.Monad.Reader (ReaderT, runReaderT, ask)
-import Control.Monad.Trans (lift)
 import Control.Monad.IO.Class (liftIO)
 
 import Data.Maybe (fromMaybe)
@@ -163,6 +162,7 @@ lowercaseFirst (c:cs) = toLower c : cs
 
 lexiconOptions :: String -> Options
 lexiconOptions prefix = defaultOptions {
+        omitNothingFields = True,
         allNullaryToStringTag = False,
         sumEncoding = TaggedObject "$type" "",
         constructorTagModifier = \s -> prefix ++ lowercaseFirst s
@@ -273,10 +273,12 @@ instance ToJSON FeedReason where
     toEncoding = genericToEncoding (lexiconOptions "app.bsky.feed.defs#")
 
 instance ToJSON SkeletonFeedPost where
-    toEncoding = genericToEncoding defaultOptions
+    toJSON = genericToJSON (lexiconOptions "app.bsky.feed.defs#")
+    toEncoding = genericToEncoding (lexiconOptions "app.bsky.feed.defs#")
 
 instance ToJSON FeedSkeleton where
-    toEncoding = genericToEncoding defaultOptions
+    toJSON = genericToJSON (lexiconOptions "app.bsky.feed.defs#")
+    toEncoding = genericToEncoding (lexiconOptions "app.bsky.feed.defs#")
 
 postDBToSkeleton :: DBPost -> SkeletonFeedPost
 postDBToSkeleton p = SkeletonFeedPost {
@@ -302,7 +304,8 @@ data ReportRes = ReportRes
 instance FromJSON ReportReq
 
 instance ToJSON ReportRes where
-    toEncoding = genericToEncoding defaultOptions
+    toJSON = genericToJSON (lexiconOptions "app.bsky.feed.defs#")
+    toEncoding = genericToEncoding (lexiconOptions "app.bsky.feed.defs#")
 
 -- jetstream consumer
 data Commit = Commit
