@@ -286,7 +286,7 @@ type XRPC = "app.bsky.feed.getFeedSkeleton"
                 :> Post '[JSON] ReportRes
 
 type WellKnown = "atproto-did" :> Get '[PlainText] Text
-        :<|> "did.json" :> Get '[JSON] Text
+        :<|> "did.json" :> Get '[JSON] Value
 
 -- server
 type EnvHandler = ReaderT Env Handler
@@ -324,13 +324,18 @@ server = hello :<|> xrpc :<|> wellKnown
 
         -- did for the feed generator: the labeler is the main DID
         -- the labeler account should have an #atproto_labeler (AtprotoLabeler) service with the same endpoint
-        didJson :: EnvHandler Text
-        didJson = ask >>= \env -> return . pack $
-            "{\"@context\": [\"https://www.w3.org/ns/did/v1\"],\
-            \\"id\": \""++(feedDid env)++"\",\
-            \\"service\": [\
-            \{\"id\": \"#bsky_fg\", \"type\": \"BskyFeedGenerator\", \"serviceEndpoint\": \""++(svcUrl env)++"\"}\
-            \]}"
+        didJson :: EnvHandler Value
+        didJson = ask >>= \env -> return $ object [
+                "@context" .= toJSON ["https://www.w3.org/ns/did/v1" :: Text],
+                "id" .= feedDid env,
+                "service" .= (toJSON [
+                    object [
+                        "id" .= ("#bsky_fg" :: Text),
+                        "type" .= ("BskyFeedGenerator" :: Text),
+                        "serviceEndpoint" .= (svcUrl env)
+                    ]
+                ])
+            ]
 
 api :: Proxy API
 api = Proxy
@@ -347,7 +352,7 @@ main = do
     let env = Env {
             db = db,
             plc = "https://plc.directory/",
-            mainDid = "",
+            mainDid = "did:plc:hrxxvz6q4u67z4puuyek4qpt",
             feedDid = "did:web:priv.merkletr.ee",
             svcUrl = "https://priv.merkletr.ee"
         }
