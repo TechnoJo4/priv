@@ -1,0 +1,34 @@
+cabal-version:      2.4
+name:               priv
+version:            0.1.0.0
+license:            0BSD
+synopsis:           private follows for bsky
+author:             rkletr
+maintainer:         hs@merkletr.ee
+
+executable priv
+    main-is:            Main.hs
+    build-depends:      base
+                      , text
+                      , lens
+                      , mtl
+                      , transformers
+                      , bytestring
+                      , websockets
+                      , wuss
+                      , aeson
+                      , sqlite-simple
+                      , wai
+                      , warp
+                      , servant-server
+                      , jose
+    hs-source-dirs:     app
+    default-language:   GHC2021
+    default-extensions: OverloadedStrings
+                      , DataKinds
+                      , DuplicateRecordFields
+                      , OverloadedRecordDot
+                      , ViewPatterns
+                      , TypeFamilies
+    ghc-options:        -Wall -O2
+    ld-options:         -static -pthread
