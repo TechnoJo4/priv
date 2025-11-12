@@ -136,6 +136,26 @@ ingestRecord ts aturi@(AtUri replier _ _) (PostRecord (Just (ReplyRef parent _))
             WHERE followee = ? AND replies_to = 1
             |] (encodeAtUri aturi, ts, encodeDid repliee)
 
+getFollowRelation :: Did -> Did -> App DBFollow
+getFollowRelation follower followee = do
+    conn <- db <$> ask
+    rels <- liftIO $ SQL.query conn [sql|
+        SELECT follower, followee, posts, replies, replies_to, reposts
+        FROM follows
+        WHERE follower = ? AND followee = ?
+        |] (encodeDid follower, encodeDid followee) :: App [DBFollow]
+    return $ case rels of
+        (x:_) -> x
+        _ -> DBFollow (encodeDid follower) (encodeDid followee) False False False False
+
+setFollowRelation :: DBFollow -> App ()
+setFollowRelation rel = do
+    conn <- db <$> ask
+    liftIO $ SQL.execute conn [sql|
+        INSERT OR REPLACE INTO follows
+        VALUES (?,?,?,?,?,?)
+        |] rel
+
 -- parsing utils
 lowercaseFirst :: String -> String
 lowercaseFirst [] = []
@@ -218,8 +238,8 @@ data Record = PostRecord (Maybe ReplyRef) | RepostRecord Ref | UnknownRecord
 instance FromJSON StrongRef
 
 instance ToJSON StrongRef where
-    toJSON (StrongRef uri cid) = object ["$type" .= ("com.atproto.repo.strongRef" :: Value), "uri" .= uri, "cid" .= cid]
-    toEncoding (StrongRef uri cid) = pairs ("$type" .= ("com.atproto.repo.strongRef" :: Value) <> "uri" .= uri <> "cid" .= cid)
+    toJSON (StrongRef aturi cid) = object ["$type" .= ("com.atproto.repo.strongRef" :: Value), "uri" .= aturi, "cid" .= cid]
+    toEncoding (StrongRef aturi cid) = pairs ("$type" .= ("com.atproto.repo.strongRef" :: Value) <> "uri" .= aturi <> "cid" .= cid)
 
 instance FromJSON Ref where
     parseJSON = withObject "Ref" $ \v -> Ref <$> v .: "uri"
@@ -376,14 +396,35 @@ xrpc did = getFeedSkeleton :<|> createReport
             }
 
         createReport :: ReportReq -> EnvHandler ReportRes
-        createReport req = return
-            ReportRes {
+        createReport req = do
+            let cmds = Data.Text.words (fromMaybe "+ +rt" req.reason)
+            liftH $ do
+                rel <- getFollowRelation did req.subject.did
+                setFollowRelation $ foldl applyCmd rel cmds
+            return $ ReportRes {
                 reasonType = req.reasonType,
                 reason = req.reason,
                 subject = req.subject,
                 reportedBy = "",
                 createdAt = ""
             }
+
+        applyCmd :: DBFollow -> Text -> DBFollow
+        applyCmd rel cmd = case cmd of
+            "+" -> rel { posts = True }
+            "+posts" -> rel { posts = True }
+            "+rt" -> rel { reposts = True }
+            "+r" -> rel { replies = True }
+            "+to" -> rel { replies_to = True }
+            "+all" -> rel { posts = True, replies = True, reposts = True }
+
+            "-" -> rel { posts = False, replies = False, replies_to = False, reposts = False }
+            "-all" -> rel { posts = False, replies = False, replies_to = False, reposts = False }
+            "-posts" -> rel { posts = False }
+            "-rt" -> rel { reposts = False }
+            "-r" -> rel { replies = False }
+            "-to" -> rel { replies_to = False }
+            _ -> rel
 
 server :: ServerT API EnvHandler
 server = hello :<|> xrpc :<|> wellKnown
