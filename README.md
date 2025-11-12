@@ -2,8 +2,6 @@
 
 Private follows for Bluesky.
 
-under construction :)
-
 ## Usage
 
 Subscribe to the "labeler" so that you can send reports to it.
@@ -40,6 +38,22 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
 1. Add the `atproto_labeler` service to your main DID. You can do this through `goat plc` or `goat account plc`.
 
+   ```json
+   {
+     "did": "did:plc:hrxxvz6q4u67z4puuyek4qpt",
+     // ...
+     "services": {
+       "atproto_pds": {
+         // ...
+       },
+       "atproto_labeler": {
+         "type": "AtprotoLabeler",
+         "endpoint": "https://priv.merkletr.ee"
+       }
+     }
+   }
+   ```
+
 1. Initialize the database: `cat schema.sql | sqlite3 path/to/priv.db`
 
 1. Start your instance!
@@ -61,8 +75,8 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
    ```json
    {
-     "did": "did:web:priv.merkletr.ee",
      "$type": "app.bsky.feed.generator",
+     "did": "did:web:priv.merkletr.ee",
      "createdAt": "2025-11-11T00:00:00.000Z",
      "description": "https://github.com/TechnoJo4/priv",
      "displayName": "Private follows"
