@@ -331,7 +331,6 @@ consume conn = forever $ do
         Nothing -> return ()
         Just j -> case j.commit of
             (Commit "create" coll rkey (Just record)) -> do
-                if j.did == DidPlc "nw7wouh4kxrozfmvlzcf36kl" then liftIO $ print j else return ()
                 ingestRecord j.time_us (AtUri j.did coll rkey) record
             _ -> return ()
 
@@ -408,7 +407,7 @@ xrpc did = getFeedSkeleton :<|> createReport
                 reasonType = req.reasonType,
                 reason = req.reason,
                 subject = req.subject,
-                reportedBy = "",
+                reportedBy = encodeDid did,
                 createdAt = ""
             }
 
@@ -432,7 +431,22 @@ xrpc did = getFeedSkeleton :<|> createReport
 server :: ServerT API EnvHandler
 server = hello :<|> xrpc :<|> wellKnown
     where
-        hello = return "# This is https://github.com/TechnoJo4/priv"
+        hello = do
+            conn <- db <$> ask
+            [SQL.Only follows] <- liftIO (SQL.query_ conn [sql|
+                    SELECT COUNT(*) FROM follows
+                    |] :: IO [SQL.Only Int])
+            [SQL.Only posts] <- liftIO (SQL.query_ conn [sql|
+                    SELECT COUNT(*) FROM posts
+                    |] :: IO [SQL.Only Int])
+            return $ mconcat [
+                    "# This is https://github.com/TechnoJo4/priv\n\n",
+                    "# TYPE follows_total counter\n",
+                    "follows_total ", pack $ show follows, "\n",
+                    "# TYPE posts_total counter\n",
+                    "posts_total ", pack $ show posts, "\n"
+                ]
+
         wellKnown = atprotoDid :<|> didJson
 
         atprotoDid :: EnvHandler Text
