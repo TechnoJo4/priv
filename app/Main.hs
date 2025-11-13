@@ -3,39 +3,29 @@ module Main where
 import Control.Concurrent (forkIO)
 import Control.Lens ((^.), preview)
 import Control.Monad (forever, void, mzero)
-import Control.Monad.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.IO.Class (liftIO)
-
-import Data.Maybe (fromMaybe)
-import Data.List (unsnoc)
-
-import GHC.Generics (Generic)
-
-import Network.WebSockets (Connection, receiveData)
-import qualified Wuss
-
+import Control.Monad.Reader (ReaderT, runReaderT, ask)
+import Crypto.JWT
 import Data.Aeson
-import Data.Aeson.Types (Parser)
-
-import Data.Char (toLower)
-import Data.Text (Text, stripPrefix, split, words, pack)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
-
+import Data.Char (toLower)
+import Data.List (unsnoc)
+import Data.Maybe (fromMaybe)
+import Data.Text (Text, stripPrefix, split, words, pack)
+import Data.Time (getCurrentTime)
+import Data.Time.Format.ISO8601 (iso8601Show)
 import qualified Database.SQLite.Simple as SQL
 import Database.SQLite.Simple.FromRow
 import Database.SQLite.Simple.ToField
 import Database.SQLite.Simple.QQ (sql)
-
+import GHC.Generics (Generic)
+import Network.WebSockets (Connection, receiveData)
+import qualified Wuss
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 import Servant.Server.Experimental.Auth
-
-import Data.Time (getCurrentTime)
-import Data.Time.Format.ISO8601 (iso8601Show)
-
-import Crypto.JWT
 
 -- configuration and other persistent values
 data Env = Env
@@ -95,8 +85,7 @@ getPosts user cursor limit = do
         SELECT feed, rt, aturi, ts
         FROM posts
         WHERE feed = ? AND ts < ?
-        ORDER BY ts DESC
-        LIMIT ?
+        ORDER BY ts DESC LIMIT ?
         |] (encodeDid user, cursor, limit)
 
 ingestRecord :: Integer -> AtUri -> Record -> App ()
@@ -159,26 +148,17 @@ setFollowRelation rel = do
         |] rel
 
 -- parsing utils
-lowercaseFirst :: String -> String
-lowercaseFirst [] = []
-lowercaseFirst (c:cs) = toLower c : cs
-
 lexiconOptions :: String -> Options
 lexiconOptions prefix = defaultOptions {
         omitNothingFields = True,
         allNullaryToStringTag = False,
         sumEncoding = TaggedObject "$type" "",
-        constructorTagModifier = \s -> prefix ++ lowercaseFirst s
+        constructorTagModifier = \s -> prefix ++ case s of {[] -> []; (c:cs) -> toLower c : cs}
     }
-
-maybeToParser :: Maybe a -> Parser a
-maybeToParser v = case v of
-    Just x -> return $ x
-    Nothing -> mzero
 
 -- basic atproto types
 data Did = DidPlc Text | DidWeb Text
-    deriving (Show, Eq)
+    deriving (Show)
 
 parseDid :: Text -> Maybe Did
 parseDid (stripPrefix "did:plc:" -> Just v) = Just $ DidPlc v
@@ -190,7 +170,7 @@ encodeDid (DidPlc s) = "did:plc:" <> s
 encodeDid (DidWeb s) = "did:web:" <> s
 
 instance FromJSON Did where
-    parseJSON = withText "Did" (maybeToParser . parseDid)
+    parseJSON = withText "Did" (maybe mzero return . parseDid)
 
 instance ToJSON Did where
     toJSON = toJSON . encodeDid
@@ -209,7 +189,7 @@ encodeAtUri :: AtUri -> Text
 encodeAtUri (AtUri did coll rkey) = "at://" <> (encodeDid did) <> "/" <> coll <> "/" <> rkey
 
 instance FromJSON AtUri where
-    parseJSON = withText "AtUri" (maybeToParser . parseAtUri)
+    parseJSON = withText "AtUri" (maybe mzero return . parseAtUri)
 
 instance ToJSON AtUri where
     toJSON = toJSON . encodeAtUri
@@ -336,7 +316,6 @@ consume conn = forever $ do
             (Commit "create" coll rkey (Just record)) -> do
                 ingestRecord j.time_us (AtUri j.did coll rkey) record
             _ -> return ()
-
 
 -- atproto service auth
 authHandler :: AuthHandler Request Did

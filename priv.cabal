@@ -32,5 +32,5 @@ executable priv
                       , ViewPatterns
                       , TypeFamilies
                       , QuasiQuotes
-    ghc-options:        -Wall -O2
+    ghc-options:        -Wall -O2 -Wno-orphans
     ld-options:         -static -pthread
