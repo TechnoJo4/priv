@@ -22,6 +22,7 @@ executable priv
                       , warp
                       , servant-server
                       , jose
+                      , time
     hs-source-dirs:     app
     default-language:   GHC2021
     default-extensions: OverloadedStrings

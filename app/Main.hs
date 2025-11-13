@@ -32,6 +32,9 @@ import Network.Wai.Handler.Warp
 import Servant
 import Servant.Server.Experimental.Auth
 
+import Data.Time (getCurrentTime)
+import Data.Time.Format.ISO8601 (iso8601Show)
+
 import Crypto.JWT
 
 -- configuration and other persistent values
@@ -403,12 +406,13 @@ xrpc did = getFeedSkeleton :<|> createReport
             liftH $ do
                 rel <- getFollowRelation did req.subject.did
                 setFollowRelation $ foldl applyCmd rel cmds
+            t <- liftIO $ getCurrentTime
             return $ ReportRes {
                 reasonType = req.reasonType,
                 reason = req.reason,
                 subject = req.subject,
                 reportedBy = encodeDid did,
-                createdAt = ""
+                createdAt = pack $ iso8601Show t
             }
 
         applyCmd :: DBFollow -> Text -> DBFollow
