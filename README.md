@@ -4,7 +4,7 @@ Private follows for Bluesky.
 
 ## Usage
 
-Subscribe to the "labeler" so that you can send reports to it.
+Subscribe to [the "labeler"](https://bsky.app/profile/did:plc:hrxxvz6q4u67z4puuyek4qpt) so that you can send reports to it, and pin [the feed](https://bsky.app/profile/priv.merkletr.ee/feed/3m5h4ao75nd2k).
 
 Report a user with the "Other" reason type, and enter a combination of these commands:
 - `+` or `+posts`: follow a user's posts
@@ -21,10 +21,11 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
 ## TODO
 
-- Save jetstream cursor
-- Handle deletes
-- Verify service auth JWTs
-- Prune inactive users
+- Jetstream cursor persistence
+- Config file
+- Deletions
+- Service auth JWT verification
+- Inactive user pruning?
 
 ## Deploying
 
