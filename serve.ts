@@ -4,7 +4,7 @@ import { cors } from "@atcute/xrpc-server/middlewares/cors";
 import { ComAtprotoModerationCreateReport } from "@atcute/atproto";
 import { AppBskyFeedGetFeedSkeleton } from "@atcute/bluesky";
 import { CompositeDidDocumentResolver, PlcDidDocumentResolver, WebDidDocumentResolver } from "@atcute/identity-resolver";
-import { ResourceUri } from "@atcute/lexicons";
+import { ResourceUri, Did } from "@atcute/lexicons";
 import { db, getConfig } from "./db.ts";
 
 const router = new XRPCRouter({ middlewares: [cors()] });
@@ -22,7 +22,7 @@ const config = {
 };
 
 const jwtVerifier = new ServiceJwtVerifier({
-	serviceDid: "did:web:my-service.example.com",
+	serviceDid: config.feedDid as Did,
 	resolver: new CompositeDidDocumentResolver({
 		methods: {
 			plc: new PlcDidDocumentResolver({
