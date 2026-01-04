@@ -39,6 +39,7 @@ const verifyServiceAuth = async (request: Request, lxm: `${string}.${string}.${s
 		throw new AuthRequiredError({ description: `missing or invalid authorization header` });
 
 	const result = await jwtVerifier.verify(authHeader.slice(7), { lxm });
+    console.log(result, authHeader);
 	if (!result.ok)
 		throw new AuthRequiredError({ description: result.error.description });
 
