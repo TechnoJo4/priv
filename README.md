@@ -21,7 +21,6 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
 ## TODO
 
-- Deletions
 - Inactive user pruning?
 
 ## Deploying

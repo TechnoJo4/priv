@@ -45,6 +45,8 @@ const ingestRepliee = db.prepare(`
     FROM follows
     WHERE followee = ? AND replies_to = 1`);
 
+const ingestDelete = db.prepare(`DELETE FROM posts WHERE aturi = ?`);
+
 const didFromAturi = (aturi: string): string => aturi.substring(4).split("/")[0]
 
 for await (const event of subscription) {
@@ -67,5 +69,7 @@ for await (const event of subscription) {
                 ingestRepost.run(aturi, record.subject.uri, event.time_us, event.did);
                 break;
         }
+    } else if (event.kind === "commit" && event.commit.operation === "delete") {
+        ingestDelete.run(`at://${event.did}/${event.commit.collection}/${event.commit.rkey}`);
     }
 }
