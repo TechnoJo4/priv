@@ -140,10 +140,12 @@ export default {
             case "/":
                 return new Response(`# This is https://github.com/TechnoJo4/priv
 
-# TYPE follows_total counter
+# TYPE follows_total gauge
 follows_total ${db.prepare("SELECT COUNT(*) FROM follows").value<number[]>()?.[0]}
-# TYPE posts_total counter
-posts_total ${db.prepare("SELECT COUNT(*) FROM posts").value<number[]>()?.[0]}`, { headers: { "content-type": "text/plain" } });
+# TYPE posts_total gauge
+posts_total ${db.prepare("SELECT COUNT(*) FROM posts").value<number[]>()?.[0]}
+# TYPE users_total gauge
+users_total ${db.prepare("SELECT COUNT(DISTINCT follower) FROM follows").value<number[]>()?.[0]}`, { headers: { "content-type": "text/plain" } });
             case "/.well-known/atproto-did":
                 return new Response(config.mainDid, { headers: { "content-type": "text/plain" } });
             case "/.well-known/did.json":
