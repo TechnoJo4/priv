@@ -56,6 +56,7 @@ router.addQuery(AppBskyFeedGetFeedSkeleton, {
         const cursor = parseInt(params.cursor || "99999999999999999");
         if (params.limit < 0 || params.limit > 100) params.limit = 100;
         const feed = getPosts.values<[ResourceUri | null, ResourceUri, number]>(auth.issuer, cursor, params.limit);
+        console.log(feed)
         return json({
             feed: feed.map(([rt, aturi, _]) => ({
                 post: aturi,
