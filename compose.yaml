@@ -4,47 +4,13 @@ services:
     restart: unless-stopped
     command: deno run -A ingest.ts
     volumes:
-      - "./priv.db:/app/priv.db"
+      - "./data:/app/data"
 
   priv-server:
     image: priv
     restart: unless-stopped
     command: deno serve -A --parallel --port 80 serve.ts
     volumes:
-      - "./priv.db:/app/priv.db"
+      - "./data:/app/data"
     ports:
       - "127.0.0.1:8080:80"
-
-  zplc-ingest:
-    image: zplc
-    build:
-      context: ./zplc-server/
-      dockerfile_inline: |
-        FROM denoland/deno:2.4.0
-        WORKDIR /plc
-        COPY --chown=deno:deno . .
-    pull_policy: never
-    command: deno run -A src/ingest.ts
-    volumes:
-      - zplc-data:/plc/data
-    restart: always
-
-  plc:
-    image: zplc
-    build:
-      context: ./zplc-server/
-      dockerfile_inline: |
-        FROM denoland/deno:2.4.0
-        WORKDIR /plc
-        COPY --chown=deno:deno . .
-    pull_policy: never
-    command: deno serve -A --port 80 src/serve-plc.ts
-    volumes:
-      - zplc-data:/plc/data
-    restart: always
-    ports:
-      - "127.0.0.1:6969:80"
-
-volumes:
-  zplc-data:
-    name: zplc-data

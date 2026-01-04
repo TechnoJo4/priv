@@ -21,6 +21,14 @@ The default command if you enter none is `+ +rt` (following someone and their re
 
 ## Deploying
 
+To set a config option, open the database (`sqlite`) and execute `INSERT OR REPLACE INTO config (k, v) VALUES (?, ?)`.
+
+1. Start the ingester to initialize the database.
+
+1. Choose between hosting your own mirror of `did:plc` or using Bluesky's directory to resolve.
+
+   **Config** `plc`: `https://plc.directory/`
+
 1. Choose a domain for your feed generator, e.g. `priv.merkletr.ee`.
 
    **Config** `feedDid`: `did:web:priv.merkletr.ee`, `svcUrl`: `https://priv.merkletr.ee`
@@ -47,9 +55,7 @@ The default command if you enter none is `+ +rt` (following someone and their re
    }
    ```
 
-1. Initialize the database: `cat schema.sql | sqlite3 path/to/priv.db`
-
-1. Start your instance!
+1.
 
 1. Create the `app.bsky.labeler.service` labeler definition record, e.g.:
 
