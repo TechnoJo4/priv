@@ -37,6 +37,8 @@ To set a config option, open the database (`sqlite`) and execute `INSERT OR REPL
 
    **Config** `mainDid`: `did:plc:hrxxvz6q4u67z4puuyek4qpt`
 
+1. You may now start the server.
+
 1. Add the `atproto_labeler` service to your main DID. You can do this through `goat plc` or `goat account plc`.
 
    ```json
@@ -54,8 +56,6 @@ To set a config option, open the database (`sqlite`) and execute `INSERT OR REPL
      }
    }
    ```
-
-1.
 
 1. Create the `app.bsky.labeler.service` labeler definition record, e.g.:
 
