@@ -53,13 +53,12 @@ const getPosts = db.prepare(`SELECT rt, aturi, ts
 router.addQuery(AppBskyFeedGetFeedSkeleton, {
     async handler({ request, params }) {
         const auth = await verifyServiceAuth(request, feedJwtVerifier, "app.bsky.feed.getFeedSkeleton");
-        const cursor = BigInt(params.cursor || "99999999999999999");
+        const cursor = params.cursor ? BigInt(params.cursor) : 99999999999999999n;
         if (params.limit < 0 || params.limit > 100) params.limit = 100;
         const feed = getPosts.values<[ResourceUri | null, ResourceUri, bigint]>(auth.issuer, cursor, params.limit);
         if (feed.length === 0)
             return json({
-                feed: params.cursor ? [] : [ { post:"at://did:plc:hrxxvz6q4u67z4puuyek4qpt/app.bsky.feed.post" } ],
-                cursor: "0"
+                feed: params.cursor ? [] : [ { post: "at://did:plc:hrxxvz6q4u67z4puuyek4qpt/app.bsky.feed.post" } ]
             });
 
         return json({
