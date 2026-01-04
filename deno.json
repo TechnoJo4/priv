@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "@atcute/atproto": "npm:@atcute/atproto@^3.1.10",
+    "@atcute/bluesky": "npm:@atcute/bluesky@^3.2.14",
+    "@atcute/identity-resolver": "npm:@atcute/identity-resolver@^1.2.2",
+    "@atcute/jetstream": "npm:@atcute/jetstream@^1.1.2",
+    "@atcute/lexicons": "npm:@atcute/lexicons@^1.2.6",
+    "@atcute/xrpc-server": "npm:@atcute/xrpc-server@^0.1.6",
+    "@db/sqlite": "jsr:@db/sqlite@^0.13.0"
+  }
+}

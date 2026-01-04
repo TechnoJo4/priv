@@ -1,0 +1,227 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@db/sqlite@0.13": "0.13.0",
+    "jsr:@denosaurs/plug@1": "1.1.0",
+    "jsr:@std/encoding@1": "1.0.10",
+    "jsr:@std/fmt@1": "1.0.8",
+    "jsr:@std/fs@1": "1.0.21",
+    "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@std/path@1": "1.0.9",
+    "jsr:@std/path@1.0": "1.0.9",
+    "jsr:@std/path@^1.1.4": "1.1.4",
+    "npm:@atcute/atproto@^3.1.10": "3.1.10",
+    "npm:@atcute/bluesky@^3.2.14": "3.2.14",
+    "npm:@atcute/identity-resolver@^1.2.2": "1.2.2_@atcute+identity@1.1.3",
+    "npm:@atcute/jetstream@^1.1.2": "1.1.2",
+    "npm:@atcute/lexicons@^1.2.6": "1.2.6",
+    "npm:@atcute/xrpc-server@~0.1.6": "0.1.6_@atcute+identity@1.1.3"
+  },
+  "jsr": {
+    "@db/sqlite@0.13.0": {
+      "integrity": "4545c635e0b3d4ddfdc0f2240f932f24b8ad0178e9c2e3a0f9403e7b18ae2fb5",
+      "dependencies": [
+        "jsr:@denosaurs/plug",
+        "jsr:@std/path@1.0"
+      ]
+    },
+    "@denosaurs/plug@1.1.0": {
+      "integrity": "eb2f0b7546c7bca2000d8b0282c54d50d91cf6d75cb26a80df25a6de8c4bc044",
+      "dependencies": [
+        "jsr:@std/encoding",
+        "jsr:@std/fmt",
+        "jsr:@std/fs",
+        "jsr:@std/path@1"
+      ]
+    },
+    "@std/encoding@1.0.10": {
+      "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
+    },
+    "@std/fmt@1.0.8": {
+      "integrity": "71e1fc498787e4434d213647a6e43e794af4fd393ef8f52062246e06f7e372b7"
+    },
+    "@std/fs@1.0.21": {
+      "integrity": "d720fe1056d78d43065a4d6e0eeb2b19f34adb8a0bc7caf3a4dbf1d4178252cd",
+      "dependencies": [
+        "jsr:@std/internal",
+        "jsr:@std/path@^1.1.4"
+      ]
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    },
+    "@std/path@1.0.9": {
+      "integrity": "260a49f11edd3db93dd38350bf9cd1b4d1366afa98e81b86167b4e3dd750129e"
+    },
+    "@std/path@1.1.4": {
+      "integrity": "1d2d43f39efb1b42f0b1882a25486647cb851481862dc7313390b2bb044314b5",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    }
+  },
+  "npm": {
+    "@atcute/atproto@3.1.10": {
+      "integrity": "sha512-+GKZpOc0PJcdWMQEkTfg/rSNDAAHxmAUGBl60g2az15etqJn5WaUPNGFE2sB7hKpwi5Ue2h/L0OacINcE/JDDQ==",
+      "dependencies": [
+        "@atcute/lexicons"
+      ]
+    },
+    "@atcute/bluesky@3.2.14": {
+      "integrity": "sha512-XlVuF55AYIyplmKvlGLlj+cUvk9ggxNRPczkTPIY991xJ4qDxDHpBJ39ekAV4dWcuBoRo2o9JynzpafPu2ljDA==",
+      "dependencies": [
+        "@atcute/atproto",
+        "@atcute/lexicons"
+      ]
+    },
+    "@atcute/cbor@2.2.8": {
+      "integrity": "sha512-UzOAN9BuN6JCXgn0ryV8qZuRJUDrNqrbLd6EFM8jc6RYssjRyGRxNy6RZ1NU/07Hd8Tq/0pz8+nQiMu5Zai5uw==",
+      "dependencies": [
+        "@atcute/cid",
+        "@atcute/multibase",
+        "@atcute/uint8array"
+      ]
+    },
+    "@atcute/cid@2.3.0": {
+      "integrity": "sha512-1SRdkTuMs/l5arQ+7Ag0F7JAueZqtzYE0d2gmbkuzi8EPweNU1kYlQs0CE4dSd81YF8PMDTOQty0K2ATq9CW9g==",
+      "dependencies": [
+        "@atcute/multibase",
+        "@atcute/uint8array"
+      ]
+    },
+    "@atcute/crypto@2.3.0": {
+      "integrity": "sha512-w5pkJKCjbNMQu+F4JRHbR3ROQyhi1wbn+GSC6WDQamcYHkZmEZk1/eoI354bIQOOfkEM6aFLv718iskrkon4GQ==",
+      "dependencies": [
+        "@atcute/multibase",
+        "@atcute/uint8array",
+        "@noble/secp256k1"
+      ]
+    },
+    "@atcute/identity-resolver@1.2.2_@atcute+identity@1.1.3": {
+      "integrity": "sha512-eUh/UH4bFvuXS0X7epYCeJC/kj4rbBXfSRumLEH4smMVwNOgTo7cL/0Srty+P/qVPoZEyXdfEbS0PHJyzoXmHw==",
+      "dependencies": [
+        "@atcute/identity",
+        "@atcute/lexicons",
+        "@atcute/util-fetch",
+        "@badrap/valita"
+      ]
+    },
+    "@atcute/identity@1.1.3": {
+      "integrity": "sha512-oIqPoI8TwWeQxvcLmFEZLdN2XdWcaLVtlm8pNk0E72As9HNzzD9pwKPrLr3rmTLRIoULPPFmq9iFNsTeCIU9ng==",
+      "dependencies": [
+        "@atcute/lexicons",
+        "@badrap/valita"
+      ]
+    },
+    "@atcute/jetstream@1.1.2": {
+      "integrity": "sha512-u6p/h2xppp7LE6W/9xErAJ6frfN60s8adZuCKtfAaaBBiiYbb1CfpzN8Uc+2qtJZNorqGvuuDb5572Jmh7yHBQ==",
+      "dependencies": [
+        "@atcute/lexicons",
+        "@badrap/valita",
+        "@mary-ext/event-iterator",
+        "@mary-ext/simple-event-emitter",
+        "partysocket",
+        "type-fest",
+        "yocto-queue"
+      ]
+    },
+    "@atcute/lexicons@1.2.6": {
+      "integrity": "sha512-s76UQd8D+XmHIzrjD9CJ9SOOeeLPHc+sMmcj7UFakAW/dDFXc579fcRdRfuUKvXBL5v1Gs2VgDdlh/IvvQZAwA==",
+      "dependencies": [
+        "@atcute/uint8array",
+        "@atcute/util-text",
+        "@standard-schema/spec",
+        "esm-env"
+      ]
+    },
+    "@atcute/multibase@1.1.6": {
+      "integrity": "sha512-HBxuCgYLKPPxETV0Rot4VP9e24vKl8JdzGCZOVsDaOXJgbRZoRIF67Lp0H/OgnJeH/Xpva8Z5ReoTNJE5dn3kg==",
+      "dependencies": [
+        "@atcute/uint8array"
+      ]
+    },
+    "@atcute/uint8array@1.0.6": {
+      "integrity": "sha512-ucfRBQc7BFT8n9eCyGOzDHEMKF/nZwhS2pPao4Xtab1ML3HdFYcX2DM1tadCzas85QTGxHe5urnUAAcNKGRi9A=="
+    },
+    "@atcute/util-fetch@1.0.5": {
+      "integrity": "sha512-qjHj01BGxjSjIFdPiAjSARnodJIIyKxnCMMEcXMESo9TAyND6XZQqrie5fia+LlYWVXdpsTds8uFQwc9jdKTig==",
+      "dependencies": [
+        "@badrap/valita"
+      ]
+    },
+    "@atcute/util-text@0.0.1": {
+      "integrity": "sha512-t1KZqvn0AYy+h2KcJyHnKF9aEqfRfMUmyY8j1ELtAEIgqN9CxINAjxnoRCJIFUlvWzb+oY3uElQL/Vyk3yss0g==",
+      "dependencies": [
+        "unicode-segmenter"
+      ]
+    },
+    "@atcute/xrpc-server@0.1.6_@atcute+identity@1.1.3": {
+      "integrity": "sha512-oUSDxQxVHtAv401CQCTaQ4o1m64D24wfGjA/8LhTMGL0bJiHN4TcjN+FqrRumc7t0EzpQL4aHbBwqoAeGkkcAA==",
+      "dependencies": [
+        "@atcute/cbor",
+        "@atcute/crypto",
+        "@atcute/identity",
+        "@atcute/identity-resolver",
+        "@atcute/lexicons",
+        "@atcute/multibase",
+        "@atcute/uint8array",
+        "@badrap/valita",
+        "nanoid"
+      ]
+    },
+    "@badrap/valita@0.4.6": {
+      "integrity": "sha512-4kdqcjyxo/8RQ8ayjms47HCWZIF5981oE5nIenbfThKDxWXtEHKipAOWlflpPJzZx9y/JWYQkp18Awr7VuepFg=="
+    },
+    "@mary-ext/event-iterator@1.0.0": {
+      "integrity": "sha512-l6gCPsWJ8aRCe/s7/oCmero70kDHgIK5m4uJvYgwEYTqVxoBOIXbKr5tnkLqUHEg6mNduB4IWvms3h70Hp9ADQ==",
+      "dependencies": [
+        "yocto-queue"
+      ]
+    },
+    "@mary-ext/simple-event-emitter@1.0.0": {
+      "integrity": "sha512-meA/zJZKIN1RVBNEYIbjufkUrW7/tRjHH60FjolpG1ixJKo76TB208qefQLNdOVDA7uIG0CGEDuhmMirtHKLAg=="
+    },
+    "@noble/secp256k1@3.0.0": {
+      "integrity": "sha512-NJBaR352KyIvj3t6sgT/+7xrNyF9Xk9QlLSIqUGVUYlsnDTAUqY8LOmwpcgEx4AMJXRITQ5XEVHD+mMaPfr3mg=="
+    },
+    "@standard-schema/spec@1.1.0": {
+      "integrity": "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="
+    },
+    "esm-env@1.2.2": {
+      "integrity": "sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA=="
+    },
+    "event-target-polyfill@0.0.4": {
+      "integrity": "sha512-Gs6RLjzlLRdT8X9ZipJdIZI/Y6/HhRLyq9RdDlCsnpxr/+Nn6bU2EFGuC94GjxqhM+Nmij2Vcq98yoHrU8uNFQ=="
+    },
+    "nanoid@5.1.6": {
+      "integrity": "sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==",
+      "bin": true
+    },
+    "partysocket@1.1.10": {
+      "integrity": "sha512-ACfn0P6lQuj8/AqB4L5ZDFcIEbpnIteNNObrlxqV1Ge80GTGhjuJ2sNKwNQlFzhGi4kI7fP/C1Eqh8TR78HjDQ==",
+      "dependencies": [
+        "event-target-polyfill"
+      ]
+    },
+    "type-fest@4.41.0": {
+      "integrity": "sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA=="
+    },
+    "unicode-segmenter@0.14.5": {
+      "integrity": "sha512-jHGmj2LUuqDcX3hqY12Ql+uhUTn8huuxNZGq7GvtF6bSybzH3aFgedYu/KTzQStEgt1Ra2F3HxadNXsNjb3m3g=="
+    },
+    "yocto-queue@1.2.2": {
+      "integrity": "sha512-4LCcse/U2MHZ63HAJVE+v71o7yOdIe4cZ70Wpf8D/IyjDKYQLV5GD46B+hSTjJsvV5PztjvHoU580EftxjDZFQ=="
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@db/sqlite@0.13",
+      "npm:@atcute/atproto@^3.1.10",
+      "npm:@atcute/bluesky@^3.2.14",
+      "npm:@atcute/identity-resolver@^1.2.2",
+      "npm:@atcute/jetstream@^1.1.2",
+      "npm:@atcute/lexicons@^1.2.6",
+      "npm:@atcute/xrpc-server@~0.1.6"
+    ]
+  }
+}
