@@ -124,7 +124,12 @@ export default {
         const pathname = decodeURIComponent(new URL(req.url).pathname);
         switch (pathname) {
             case "/":
-                return new Response(`# This is https://github.com/TechnoJo4/priv\n\n`, { headers: { "content-type": "text/plain" } });
+                return new Response(`# This is https://github.com/TechnoJo4/priv
+
+# TYPE follows_total counter
+follows_total ${db.prepare("SELECT COUNT(*) FROM follows").value<number[]>()?.[0]}
+# TYPE posts_total counter
+posts_total ${db.prepare("SELECT COUNT(*) FROM posts").value<number[]>()?.[0]}`, { headers: { "content-type": "text/plain" } });
             case "/.well-known/atproto-did":
                 return new Response(config.mainDid, { headers: { "content-type": "text/plain" } });
             case "/.well-known/did.json":
