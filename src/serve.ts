@@ -6,19 +6,16 @@ import { AppBskyFeedGetFeedSkeleton } from "@atcute/bluesky";
 import { CompositeDidDocumentResolver, PlcDidDocumentResolver, WebDidDocumentResolver } from "@atcute/identity-resolver";
 import { ResourceUri, Did } from "@atcute/lexicons";
 import { db, getConfig } from "./db.ts";
+import { assert, pipe } from "./utils.ts";
 
 const router = new XRPCRouter({ middlewares: [cors()] });
-
-const assert = <T>(v: T | undefined, err: string): T => {
-    if (v === undefined) throw new Error(err);
-    return v;
-}
 
 const config = {
     plc: assert(getConfig("plc"), "config: plc must be provided"),
     mainDid: assert(getConfig("mainDid"), "config: mainDid must be provided"),
     feedDid: assert(getConfig("feedDid"), "config: feedDid must be provided"),
     svcUrl: assert(getConfig("svcUrl"), "config: svcUrl must be provided"),
+    maxFollows: pipe(getConfig("maxFollows"), parseInt),
 };
 
 const resolver  = new CompositeDidDocumentResolver({
@@ -90,6 +87,10 @@ const getRelation = db.prepare(`
 
 const setRelation = db.prepare(`INSERT OR REPLACE INTO follows VALUES (?,?,?,?,?,?)`);
 
+const delRelation = db.prepare(`DELETE FROM follows WHERE follower = ? AND followee = ?`);
+
+const relCount = db.prepare(`SELECT COUNT(*) FROM follows WHERE follower = ?`);
+
 const EMPTY_REL = { posts: 0, replies: 0, replies_to: 0, reposts: 0 };
 
 router.addProcedure(ComAtprotoModerationCreateReport, {
@@ -99,7 +100,12 @@ router.addProcedure(ComAtprotoModerationCreateReport, {
             throw new InvalidRequestError({ description: "report subject must be an account" })
 
         let rel = getRelation.all<{posts: number, replies: number, replies_to: number, reposts: number}>(auth.issuer, input.subject.did)[0];
-        if (!rel) rel = {...EMPTY_REL};
+        if (!rel) {
+            if (config.maxFollows !== undefined && (relCount.value<number[]>(auth.issuer)?.[0] ?? 0) >= config.maxFollows)
+                throw new InvalidRequestError({ description: `you've exceeded the max follow count (${config.maxFollows})` });
+
+            rel = {...EMPTY_REL};
+        }
 
         (input.reason || "+ +rt").split(" ").forEach(cmd => {
             switch (cmd) {
@@ -120,7 +126,10 @@ router.addProcedure(ComAtprotoModerationCreateReport, {
             }
         });
 
-        setRelation.run(auth.issuer, input.subject.did, rel.posts, rel.replies, rel.replies_to, rel.reposts);
+        if (Object.values(rel).includes(1))
+            setRelation.run(auth.issuer, input.subject.did, rel.posts, rel.replies, rel.replies_to, rel.reposts);
+        else
+            delRelation.run(auth.issuer, input.subject.did);
 
         return json({
             reportedBy: auth.issuer,
