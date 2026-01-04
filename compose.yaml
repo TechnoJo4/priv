@@ -2,14 +2,14 @@ services:
   priv-ingest:
     image: priv
     restart: unless-stopped
-    command: deno run -A ingest.ts
+    command: deno run -A src/ingest.ts
     volumes:
       - "./data:/app/data"
 
   priv-server:
     image: priv
     restart: unless-stopped
-    command: deno serve -A --parallel --port 80 serve.ts
+    command: deno serve -A --parallel --port 80 src/serve.ts
     volumes:
       - "./data:/app/data"
     ports:
