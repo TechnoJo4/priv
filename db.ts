@@ -1,6 +1,6 @@
 import { Database } from "@db/sqlite";
 
-export const db = new Database("./data/priv.db");
+export const db = new Database("./priv.db");
 
 const qGetConfig = db.prepare("SELECT v FROM config WHERE k = ?");
 const qSetConfig = db.prepare("INSERT OR REPLACE INTO config(k,v) VALUES (?,?)");
