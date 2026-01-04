@@ -1,6 +1,6 @@
 import { Database } from "@db/sqlite";
 
-export const db = new Database("./priv.db", {
+export const db = new Database("./data/priv.db", {
     int64: true
 });
 
