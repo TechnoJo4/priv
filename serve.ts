@@ -21,29 +21,29 @@ const config = {
     svcUrl: assert(getConfig("svcUrl"), "config: svcUrl must be provided"),
 };
 
-const jwtVerifier = new ServiceJwtVerifier({
-	serviceDid: config.feedDid as Did,
-	resolver: new CompositeDidDocumentResolver({
-		methods: {
-			plc: new PlcDidDocumentResolver({
-                apiUrl: config.plc
-            }),
-			web: new WebDidDocumentResolver(),
-		},
-	}),
+const resolver  = new CompositeDidDocumentResolver({
+    methods: {
+        plc: new PlcDidDocumentResolver({
+            apiUrl: config.plc
+        }),
+        web: new WebDidDocumentResolver(),
+    },
 });
 
-const verifyServiceAuth = async (request: Request, lxm: `${string}.${string}.${string}`): Promise<VerifiedJwt> => {
-	const authHeader = request.headers.get("authorization");
-	if (!authHeader?.startsWith("Bearer "))
-		throw new AuthRequiredError({ description: `missing or invalid authorization header` });
+const mainJwtVerifier = new ServiceJwtVerifier({ resolver, serviceDid: config.mainDid as Did });
+const feedJwtVerifier = new ServiceJwtVerifier({ resolver, serviceDid: config.feedDid as Did });
 
-	const result = await jwtVerifier.verify(authHeader.slice(7), { lxm });
+const verifyServiceAuth = async (request: Request, jwtVerifier: ServiceJwtVerifier, lxm: `${string}.${string}.${string}`): Promise<VerifiedJwt> => {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer "))
+        throw new AuthRequiredError({ description: `missing or invalid authorization header` });
+
+    const result = await jwtVerifier.verify(authHeader.slice(7), { lxm });
     console.log(result, authHeader);
-	if (!result.ok)
-		throw new AuthRequiredError({ description: result.error.description });
+    if (!result.ok)
+        throw new AuthRequiredError({ description: result.error.description });
 
-	return result.value;
+    return result.value;
 };
 
 const getPosts = db.prepare(`SELECT rt, aturi, ts
@@ -53,7 +53,7 @@ const getPosts = db.prepare(`SELECT rt, aturi, ts
 
 router.addQuery(AppBskyFeedGetFeedSkeleton, {
     async handler({ request, params }) {
-        const auth = await verifyServiceAuth(request, "app.bsky.feed.getFeedSkeleton");
+        const auth = await verifyServiceAuth(request, feedJwtVerifier, "app.bsky.feed.getFeedSkeleton");
         const cursor = BigInt(params.cursor || "99999999999999999");
         if (params.limit < 0 || params.limit > 100) params.limit = 100;
         const feed = getPosts.values<[ResourceUri | null, ResourceUri, bigint]>(auth.issuer, cursor, params.limit);
@@ -81,7 +81,7 @@ const EMPTY_REL = { posts: 0, replies: 0, replies_to: 0, reposts: 0 };
 
 router.addProcedure(ComAtprotoModerationCreateReport, {
     async handler({ request, input }) {
-        const auth = await verifyServiceAuth(request, "com.atproto.moderation.createReport");
+        const auth = await verifyServiceAuth(request, mainJwtVerifier, "com.atproto.moderation.createReport");
         if (input.subject.$type !== "com.atproto.admin.defs#repoRef")
             throw new InvalidRequestError({ description: "report subject must be an account" })
 
