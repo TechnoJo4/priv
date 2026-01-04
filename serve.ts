@@ -50,16 +50,25 @@ const getPosts = db.prepare(`SELECT rt, aturi, ts
         WHERE feed = ? AND ts < ?
         ORDER BY ts DESC LIMIT ?`);
 
+const hasFollow = db.prepare(`SELECT EXISTS (SELECT 1 FROM follows WHERE follower = ?)`);
+
 router.addQuery(AppBskyFeedGetFeedSkeleton, {
     async handler({ request, params }) {
         const auth = await verifyServiceAuth(request, feedJwtVerifier, "app.bsky.feed.getFeedSkeleton");
         const cursor = params.cursor ? BigInt(params.cursor) : 99999999999999999n;
         if (params.limit < 0 || params.limit > 100) params.limit = 100;
         const feed = getPosts.values<[ResourceUri | null, ResourceUri, bigint]>(auth.issuer, cursor, params.limit);
-        if (feed.length === 0)
+        if (feed.length === 0) {
+            if (params.cursor) return json({ feed: [] });
+
             return json({
-                feed: params.cursor ? [] : [ { post: "at://did:plc:hrxxvz6q4u67z4puuyek4qpt/app.bsky.feed.post/3mbkw2kvwg22k" } ]
+                feed: [ {
+                    post: hasFollow.value<boolean[]>(auth.issuer)?.[0]
+                        ? "at://did:plc:hrxxvz6q4u67z4puuyek4qpt/app.bsky.feed.post/3mbm5wji5ds2p"
+                        : "at://did:plc:hrxxvz6q4u67z4puuyek4qpt/app.bsky.feed.post/3mbkw2kvwg22k"
+                } ]
             });
+        }
 
         return json({
             feed: feed.map(([rt, aturi, _]) => ({
