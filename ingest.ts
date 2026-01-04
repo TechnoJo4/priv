@@ -18,8 +18,8 @@ const subscription = new JetstreamSubscription({
 });
 
 setInterval(() => {
-    console.log(`committing cursor ${subscription.cursor}`);
 	setConfig(CURSOR_KEY, String(subscription.cursor));
+    console.log(`committed cursor ${subscription.cursor}`);
 }, 5_000);
 
 const ingestRepost = db.prepare(`
