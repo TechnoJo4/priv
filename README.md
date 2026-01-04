@@ -19,10 +19,6 @@ Join multiple commands together with spaces.
 
 The default command if you enter none is `+ +rt` (following someone and their retweets).
 
-## TODO
-
-- Inactive user pruning?
-
 ## Deploying
 
 1. Choose a domain for your feed generator, e.g. `priv.merkletr.ee`.
