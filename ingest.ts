@@ -18,6 +18,7 @@ const subscription = new JetstreamSubscription({
 });
 
 setInterval(() => {
+    console.log(`committing cursor ${subscription.cursor}`);
 	setConfig(CURSOR_KEY, String(subscription.cursor));
 }, 5_000);
 
@@ -49,13 +50,17 @@ const ingestDelete = db.prepare(`DELETE FROM posts WHERE aturi = ?`);
 
 const didFromAturi = (aturi: string): string => aturi.substring(4).split("/")[0]
 
+console.log("ready to consume");
 for await (const event of subscription) {
 	if (event.kind === "commit" && event.commit.operation === "create") {
         const record = event.commit.record;
         const aturi = `at://${event.did}/${event.commit.collection}/${event.commit.rkey}`;
         switch (event.commit.collection) {
             case "app.bsky.feed.post":
-                if (!is(AppBskyFeedPost.mainSchema, record)) break;
+                if (!is(AppBskyFeedPost.mainSchema, record)) {
+                    console.log(`ignoring invalid record ${aturi}`);
+                    break;
+                }
                 if (record.reply === undefined) {
                     ingestPost.run(aturi, event.time_us, event.did);
                 } else {
@@ -65,7 +70,10 @@ for await (const event of subscription) {
                 break;
 
             case "app.bsky.feed.repost":
-                if (!is(AppBskyFeedRepost.mainSchema, record)) break;
+                if (!is(AppBskyFeedRepost.mainSchema, record)) {
+                    console.log(`ignoring invalid record ${aturi}`);
+                    break;
+                }
                 ingestRepost.run(aturi, record.subject.uri, event.time_us, event.did);
                 break;
         }
