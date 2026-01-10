@@ -2,6 +2,7 @@ import { JetstreamSubscription } from "@atcute/jetstream";
 import { AppBskyFeedPost, AppBskyFeedRepost } from "@atcute/bluesky";
 import { is } from "@atcute/lexicons";
 import { db, getConfig, setConfig } from "./db.ts";
+import { pipe } from "./utils.ts";
 
 const CURSOR_KEY = "cursor";
 
@@ -14,13 +15,30 @@ const subscription = new JetstreamSubscription({
         "app.bsky.feed.post",
         "app.bsky.feed.repost"
     ],
-    cursor: parseInt(getConfig(CURSOR_KEY) || "0"),
+    cursor: pipe(getConfig(CURSOR_KEY), parseInt),
 });
 
 setInterval(() => {
 	setConfig(CURSOR_KEY, String(subscription.cursor));
     console.log(`committed cursor ${subscription.cursor}`);
 }, 5_000);
+
+const maxPostsPerFeed = pipe(getConfig("maxPostsPerFeed"), parseInt);
+if (maxPostsPerFeed !== undefined) {
+    const getToPrune = db.prepare(`WITH postn AS (
+        SELECT feed, ts,
+            ROW_NUMBER() OVER (PARTITION BY feed ORDER BY ts DESC) AS n
+        FROM posts)
+        SELECT feed, ts FROM postn WHERE n = 1000`);
+
+    const prune = db.prepare(`DELETE FROM posts WHERE feed = ? AND ts < ?`);
+
+    setInterval(() => {
+        const toPrune = getToPrune.values();
+        for (const [feed,ts] of toPrune)
+            prune.run(feed, ts);
+    }, pipe(getConfig("pruneInterval"), parseInt) || 3600000);
+}
 
 const ingestRepost = db.prepare(`
     INSERT OR IGNORE INTO posts(feed, rt, aturi, ts)

@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS posts(
     ts INTEGER NOT NULL,
     PRIMARY KEY (feed, aturi)
 ) STRICT;
-CREATE INDEX IF NOT EXISTS post_time ON posts (feed, ts);
+CREATE INDEX IF NOT EXISTS post_time ON posts (feed, ts DESC);
 
 CREATE TABLE IF NOT EXISTS follows(
     follower TEXT NOT NULL,
