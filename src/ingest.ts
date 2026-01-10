@@ -29,12 +29,12 @@ if (maxPostsPerFeed !== undefined) {
         SELECT feed, ts,
             ROW_NUMBER() OVER (PARTITION BY feed ORDER BY ts DESC) AS n
         FROM posts)
-        SELECT feed, ts FROM postn WHERE n = 1000`);
+        SELECT feed, ts FROM postn WHERE n = ?`);
 
     const prune = db.prepare(`DELETE FROM posts WHERE feed = ? AND ts < ?`);
 
     setInterval(() => {
-        const toPrune = getToPrune.values();
+        const toPrune = getToPrune.values(maxPostsPerFeed);
         for (const [feed,ts] of toPrune)
             prune.run(feed, ts);
     }, pipe(getConfig("pruneInterval"), parseInt) || 3600000);
