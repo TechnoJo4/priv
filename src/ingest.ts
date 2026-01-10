@@ -2,7 +2,7 @@ import { JetstreamSubscription } from "@atcute/jetstream";
 import { AppBskyFeedPost, AppBskyFeedRepost } from "@atcute/bluesky";
 import { is } from "@atcute/lexicons";
 import { db, getConfig, setConfig } from "./db.ts";
-import { pipe } from "./utils.ts";
+import { pipe, didFromAturi } from "./utils.ts";
 
 const CURSOR_KEY = "cursor";
 
@@ -65,8 +65,6 @@ const ingestRepliee = db.prepare(`
     WHERE followee = ? AND replies_to = 1`);
 
 const ingestDelete = db.prepare(`DELETE FROM posts WHERE aturi = ?`);
-
-const didFromAturi = (aturi: string): string => aturi.substring(4).split("/")[0]
 
 console.log("ready to consume");
 for await (const event of subscription) {

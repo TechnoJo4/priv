@@ -6,7 +6,7 @@ import { AppBskyFeedGetFeedSkeleton } from "@atcute/bluesky";
 import { CompositeDidDocumentResolver, PlcDidDocumentResolver, WebDidDocumentResolver } from "@atcute/identity-resolver";
 import { ResourceUri, Did } from "@atcute/lexicons";
 import { db, getConfig } from "./db.ts";
-import { assert, pipe } from "./utils.ts";
+import { assert, pipe, didFromAturi } from "./utils.ts";
 
 const router = new XRPCRouter({ middlewares: [cors()] });
 
@@ -96,10 +96,14 @@ const EMPTY_REL = { posts: 0, replies: 0, replies_to: 0, reposts: 0 };
 router.addProcedure(ComAtprotoModerationCreateReport, {
     async handler({ request, input }) {
         const auth = await verifyServiceAuth(request, mainJwtVerifier, "com.atproto.moderation.createReport");
+        const target = input.subject.$type === "com.atproto.admin.defs#repoRef"
+            ? input.subject.did
+            : didFromAturi(input.subject.uri);
+
         if (input.subject.$type !== "com.atproto.admin.defs#repoRef")
             throw new InvalidRequestError({ description: "report subject must be an account" })
 
-        let rel = getRelation.all<{posts: number, replies: number, replies_to: number, reposts: number}>(auth.issuer, input.subject.did)[0];
+        let rel = getRelation.all<{posts: number, replies: number, replies_to: number, reposts: number}>(auth.issuer, target)[0];
         if (!rel) {
             if (config.maxFollows !== undefined && (relCount.value<number[]>(auth.issuer)?.[0] ?? 0) >= config.maxFollows)
                 throw new InvalidRequestError({ description: `you've exceeded the max follow count (${config.maxFollows})` });
@@ -127,9 +131,9 @@ router.addProcedure(ComAtprotoModerationCreateReport, {
         });
 
         if (Object.values(rel).includes(1))
-            setRelation.run(auth.issuer, input.subject.did, rel.posts, rel.replies, rel.replies_to, rel.reposts);
+            setRelation.run(auth.issuer, target, rel.posts, rel.replies, rel.replies_to, rel.reposts);
         else
-            delRelation.run(auth.issuer, input.subject.did);
+            delRelation.run(auth.issuer, target);
 
         return json({
             reportedBy: auth.issuer,
