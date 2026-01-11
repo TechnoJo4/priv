@@ -84,3 +84,11 @@ To set a config option, open the database (`sqlite`) and execute `INSERT OR REPL
      "displayName": "Private follows"
    }
    ```
+
+## Config
+
+- `plc`, `mainDid`, `feedDid`, `svcUrl`: required, detailed above
+- `maxFollows`: maximum amount of follow relations each user may add
+- `maxPostsPerFeed`: amount of posts each user may have in their feed, pruning is enabled if this is set
+- `pruneInterval`: interval in milliseconds at which the pruning process runs
+- `cursor`: jetstream cursor, automatically managed by the ingester
