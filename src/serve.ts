@@ -151,6 +151,7 @@ export default {
         const pathname = decodeURIComponent(new URL(req.url).pathname);
         switch (pathname) {
             case "/":
+            case "/metrics":
                 return new Response(`# This is https://github.com/TechnoJo4/priv
 
 # TYPE follows_total gauge
