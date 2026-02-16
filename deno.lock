@@ -11,11 +11,11 @@
     "jsr:@std/path@1.0": "1.0.9",
     "jsr:@std/path@^1.1.4": "1.1.4",
     "npm:@atcute/atproto@^3.1.10": "3.1.10",
-    "npm:@atcute/bluesky@^3.2.14": "3.2.14",
+    "npm:@atcute/bluesky@^3.2.18": "3.2.18",
     "npm:@atcute/identity-resolver@^1.2.2": "1.2.2_@atcute+identity@1.1.3",
     "npm:@atcute/jetstream@^1.1.2": "1.1.2",
-    "npm:@atcute/lexicons@^1.2.6": "1.2.6",
-    "npm:@atcute/xrpc-server@~0.1.6": "0.1.6_@atcute+identity@1.1.3"
+    "npm:@atcute/lexicons@^1.2.9": "1.2.9",
+    "npm:@atcute/xrpc-server@~0.1.10": "0.1.10_@atcute+identity@1.1.3"
   },
   "jsr": {
     "@db/sqlite@0.13.0": {
@@ -67,23 +67,23 @@
         "@atcute/lexicons"
       ]
     },
-    "@atcute/bluesky@3.2.14": {
-      "integrity": "sha512-XlVuF55AYIyplmKvlGLlj+cUvk9ggxNRPczkTPIY991xJ4qDxDHpBJ39ekAV4dWcuBoRo2o9JynzpafPu2ljDA==",
+    "@atcute/bluesky@3.2.18": {
+      "integrity": "sha512-8S4D0YMUUtvZFchBpEEkvIk7luMu0Z3l50ppUa+EGDDNqF6P5gkgm8q0qfaqpULtDyInKHR+MqJ8fMm20xWgFg==",
       "dependencies": [
         "@atcute/atproto",
         "@atcute/lexicons"
       ]
     },
-    "@atcute/cbor@2.2.8": {
-      "integrity": "sha512-UzOAN9BuN6JCXgn0ryV8qZuRJUDrNqrbLd6EFM8jc6RYssjRyGRxNy6RZ1NU/07Hd8Tq/0pz8+nQiMu5Zai5uw==",
+    "@atcute/cbor@2.3.2": {
+      "integrity": "sha512-xP2SORSau/VVI00x2V4BjwIkHr6EQ7l/MXEOPaa4LGYtePFc4gnD4L1yN10dT5NEuUnvGEuCh6arLB7gz1smVQ==",
       "dependencies": [
         "@atcute/cid",
         "@atcute/multibase",
         "@atcute/uint8array"
       ]
     },
-    "@atcute/cid@2.3.0": {
-      "integrity": "sha512-1SRdkTuMs/l5arQ+7Ag0F7JAueZqtzYE0d2gmbkuzi8EPweNU1kYlQs0CE4dSd81YF8PMDTOQty0K2ATq9CW9g==",
+    "@atcute/cid@2.4.1": {
+      "integrity": "sha512-bwhna69RCv7yetXudtj+2qrMPYvhhIQqvJz6YUpUS98v7OdF3X2dnye9Nig2NDrklZcuyOsu7sQo7GOykJXRLQ==",
       "dependencies": [
         "@atcute/multibase",
         "@atcute/uint8array"
@@ -125,8 +125,8 @@
         "yocto-queue"
       ]
     },
-    "@atcute/lexicons@1.2.6": {
-      "integrity": "sha512-s76UQd8D+XmHIzrjD9CJ9SOOeeLPHc+sMmcj7UFakAW/dDFXc579fcRdRfuUKvXBL5v1Gs2VgDdlh/IvvQZAwA==",
+    "@atcute/lexicons@1.2.9": {
+      "integrity": "sha512-/RRHm2Cw9o8Mcsrq0eo8fjS9okKYLGfuFwrQ0YoP/6sdSDsXshaTLJsvLlcUcaDaSJ1YFOuHIo3zr2Om2F/16g==",
       "dependencies": [
         "@atcute/uint8array",
         "@atcute/util-text",
@@ -134,14 +134,14 @@
         "esm-env"
       ]
     },
-    "@atcute/multibase@1.1.6": {
-      "integrity": "sha512-HBxuCgYLKPPxETV0Rot4VP9e24vKl8JdzGCZOVsDaOXJgbRZoRIF67Lp0H/OgnJeH/Xpva8Z5ReoTNJE5dn3kg==",
+    "@atcute/multibase@1.1.8": {
+      "integrity": "sha512-pJgtImMZKCjqwRbu+2GzB+4xQjKBXDwdZOzeqe0u97zYKRGftpGYGvYv3+pMe2xXe+msDyu7Nv8iJp+U14otTA==",
       "dependencies": [
         "@atcute/uint8array"
       ]
     },
-    "@atcute/uint8array@1.0.6": {
-      "integrity": "sha512-ucfRBQc7BFT8n9eCyGOzDHEMKF/nZwhS2pPao4Xtab1ML3HdFYcX2DM1tadCzas85QTGxHe5urnUAAcNKGRi9A=="
+    "@atcute/uint8array@1.1.1": {
+      "integrity": "sha512-3LsC8XB8TKe9q/5hOA5sFuzGaIFdJZJNewC5OKa3o/eU6+K7JR6see9Zy2JbQERNVnRl11EzbNov1efgLMAs4g=="
     },
     "@atcute/util-fetch@1.0.5": {
       "integrity": "sha512-qjHj01BGxjSjIFdPiAjSARnodJIIyKxnCMMEcXMESo9TAyND6XZQqrie5fia+LlYWVXdpsTds8uFQwc9jdKTig==",
@@ -149,14 +149,14 @@
         "@badrap/valita"
       ]
     },
-    "@atcute/util-text@0.0.1": {
-      "integrity": "sha512-t1KZqvn0AYy+h2KcJyHnKF9aEqfRfMUmyY8j1ELtAEIgqN9CxINAjxnoRCJIFUlvWzb+oY3uElQL/Vyk3yss0g==",
+    "@atcute/util-text@1.1.1": {
+      "integrity": "sha512-JH0SxzUQJAmbOBTYyhxQbkkI6M33YpjlVLEcbP5GYt43xgFArzV0FJVmEpvIj0kjsmphHB45b6IitdvxPdec9w==",
       "dependencies": [
         "unicode-segmenter"
       ]
     },
-    "@atcute/xrpc-server@0.1.6_@atcute+identity@1.1.3": {
-      "integrity": "sha512-oUSDxQxVHtAv401CQCTaQ4o1m64D24wfGjA/8LhTMGL0bJiHN4TcjN+FqrRumc7t0EzpQL4aHbBwqoAeGkkcAA==",
+    "@atcute/xrpc-server@0.1.10_@atcute+identity@1.1.3": {
+      "integrity": "sha512-j4I+ajiYn9Oxv8h5jU7Bzv1G9x7GNcsn7xpnFT7gXh4RUq19kyoKnKDToaQ+eHyCUo+lhqJOBDbggCdiC1SuGQ==",
       "dependencies": [
         "@atcute/cbor",
         "@atcute/crypto",
@@ -217,11 +217,11 @@
     "dependencies": [
       "jsr:@db/sqlite@0.13",
       "npm:@atcute/atproto@^3.1.10",
-      "npm:@atcute/bluesky@^3.2.14",
+      "npm:@atcute/bluesky@^3.2.18",
       "npm:@atcute/identity-resolver@^1.2.2",
       "npm:@atcute/jetstream@^1.1.2",
-      "npm:@atcute/lexicons@^1.2.6",
-      "npm:@atcute/xrpc-server@~0.1.6"
+      "npm:@atcute/lexicons@^1.2.9",
+      "npm:@atcute/xrpc-server@~0.1.10"
     ]
   }
 }
