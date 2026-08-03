@@ -1,11 +1,11 @@
 {
   "imports": {
-    "@atcute/atproto": "npm:@atcute/atproto@^3.1.10",
-    "@atcute/bluesky": "npm:@atcute/bluesky@^3.2.18",
-    "@atcute/identity-resolver": "npm:@atcute/identity-resolver@^1.2.2",
-    "@atcute/jetstream": "npm:@atcute/jetstream@^1.1.2",
-    "@atcute/lexicons": "npm:@atcute/lexicons@^1.2.9",
-    "@atcute/xrpc-server": "npm:@atcute/xrpc-server@^0.1.10",
+    "@atcute/atproto": "npm:@atcute/atproto@^3.1.12",
+    "@atcute/bluesky": "npm:@atcute/bluesky@^3.3.5",
+    "@atcute/identity-resolver": "npm:@atcute/identity-resolver@^1.2.3",
+    "@atcute/jetstream": "npm:@atcute/jetstream@^1.1.3",
+    "@atcute/lexicons": "npm:@atcute/lexicons@^1.3.1",
+    "@atcute/xrpc-server": "npm:@atcute/xrpc-server@^0.1.12",
     "@db/sqlite": "jsr:@db/sqlite@^0.13.0"
   }
 }
