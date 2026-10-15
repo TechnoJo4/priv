@@ -14,13 +14,30 @@ const subscription = subscribeEvents({
     ],
     cursor: {
 		load() {
-			return pipe(getConfig(CURSOR_KEY), Number);
+			const cursor = pipe(getConfig(CURSOR_KEY), Number);
+            console.log("loading jetstream cursor", cursor ?? "live");
+            return cursor;
 		},
 		save(seq) {
 			setConfig(CURSOR_KEY, String(seq));
             console.log(`committed cursor ${seq}`)
 		},
-	}
+	},
+    onConnectionOpen() {
+        console.log("connected to jetstream");
+    },
+    onConnectionClose(event) {
+        console.error("jetstream disconnected", event.code, event.reason);
+    },
+    onConnectionError(event) {
+        console.error("jetstream connection error", event.error);
+    },
+    onError(error) {
+        console.error("jetstream error", error);
+    },
+    onInfo(info) {
+        console.log("jetstream info", info);
+    },
 });
 
 const maxPostsPerFeed = pipe(getConfig("maxPostsPerFeed"), parseInt);
@@ -73,7 +90,7 @@ for await (const event of subscription) {
 	if (event.operation === "create") {
         const record = event.record;
         const aturi = `at://${event.did}/${event.collection}/${event.rkey}`;
-        const time = Temporal.Instant.from("2024-09-09T19:46:02.329308Z").epochNanoseconds/1000n;
+        const time = Temporal.Instant.from(event.time).epochNanoseconds/1000n;
         switch (event.collection) {
             case "app.bsky.feed.post":
                 if (!is(AppBskyFeedPost.mainSchema, record)) {
