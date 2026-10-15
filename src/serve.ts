@@ -1,5 +1,5 @@
-import { XRPCRouter, AuthRequiredError, InvalidRequestError, json } from "@atcute/xrpc-server";
-import { ServiceJwtVerifier, type VerifiedJwt } from "@atcute/xrpc-server/auth";
+import { XRPCRouter, InvalidRequestError, json } from "@atcute/xrpc-server";
+import { ServiceJwtVerifier } from "@atcute/xrpc-server/auth";
 import { cors } from "@atcute/xrpc-server/middlewares/cors";
 import { ComAtprotoModerationCreateReport } from "@atcute/atproto";
 import { AppBskyFeedGetFeedSkeleton } from "@atcute/bluesky";
@@ -27,20 +27,7 @@ const resolver  = new CompositeDidDocumentResolver({
     },
 });
 
-const mainJwtVerifier = new ServiceJwtVerifier({ resolver, serviceDid: config.mainDid as Did });
-const feedJwtVerifier = new ServiceJwtVerifier({ resolver, serviceDid: config.feedDid as Did });
-
-const verifyServiceAuth = async (request: Request, jwtVerifier: ServiceJwtVerifier, lxm: `${string}.${string}.${string}`): Promise<VerifiedJwt> => {
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer "))
-        throw new AuthRequiredError({ description: `missing or invalid authorization header` });
-
-    const result = await jwtVerifier.verify(authHeader.slice(7), { lxm });
-    if (!result.ok)
-        throw new AuthRequiredError({ description: result.error.description });
-
-    return result.value;
-};
+const jwtVerifier = new ServiceJwtVerifier({ resolver, acceptAudiences: [config.mainDid, config.feedDid] as Did[] });
 
 const getPosts = db.prepare(`SELECT rt, aturi, ts
         FROM posts
@@ -51,7 +38,7 @@ const hasFollow = db.prepare(`SELECT EXISTS (SELECT 1 FROM follows WHERE followe
 
 router.addQuery(AppBskyFeedGetFeedSkeleton, {
     async handler({ request, params }) {
-        const auth = await verifyServiceAuth(request, feedJwtVerifier, "app.bsky.feed.getFeedSkeleton");
+        const auth = await jwtVerifier.verifyRequest(request, { lxm: "app.bsky.feed.getFeedSkeleton" });
         const cursor = params.cursor ? BigInt(params.cursor) : 99999999999999999n;
         if (params.limit < 0 || params.limit > 100) params.limit = 100;
         const feed = getPosts.values<[ResourceUri | null, ResourceUri, bigint]>(auth.issuer, cursor, params.limit);
@@ -95,18 +82,18 @@ const EMPTY_REL = { posts: 0, replies: 0, replies_to: 0, reposts: 0 };
 
 router.addProcedure(ComAtprotoModerationCreateReport, {
     async handler({ request, input }) {
-        const auth = await verifyServiceAuth(request, mainJwtVerifier, "com.atproto.moderation.createReport");
+        const auth = await jwtVerifier.verifyRequest(request, { lxm: "com.atproto.moderation.createReport" });
         const target = input.subject.$type === "com.atproto.admin.defs#repoRef"
             ? input.subject.did
             : didFromAturi(input.subject.uri);
 
         if (input.subject.$type !== "com.atproto.admin.defs#repoRef")
-            throw new InvalidRequestError({ description: "report subject must be an account" })
+            throw new InvalidRequestError({ message: "report subject must be an account" })
 
         let rel = getRelation.all<{posts: number, replies: number, replies_to: number, reposts: number}>(auth.issuer, target)[0];
         if (!rel) {
             if (config.maxFollows !== undefined && (relCount.value<number[]>(auth.issuer)?.[0] ?? 0) >= config.maxFollows)
-                throw new InvalidRequestError({ description: `you've exceeded the max follow count (${config.maxFollows})` });
+                throw new InvalidRequestError({ message: `you've exceeded the max follow count (${config.maxFollows})` });
 
             rel = {...EMPTY_REL};
         }
@@ -126,7 +113,7 @@ router.addProcedure(ComAtprotoModerationCreateReport, {
                 case "-to": rel.replies_to = 0; break;
 
                 default:
-                    throw new InvalidRequestError({ description: "invalid command" });
+                    throw new InvalidRequestError({ message: "invalid command" });
             }
         });
 
