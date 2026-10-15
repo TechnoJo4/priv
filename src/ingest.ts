@@ -1,4 +1,4 @@
-import { JetstreamSubscription } from "@atcute/jetstream";
+import { subscribeEvents } from "@atcute/jetstream";
 import { AppBskyFeedPost, AppBskyFeedRepost } from "@atcute/bluesky";
 import { is } from "@atcute/lexicons";
 import { db, getConfig, setConfig } from "./db.ts";
@@ -6,22 +6,22 @@ import { pipe, didFromAturi } from "./utils.ts";
 
 const CURSOR_KEY = "cursor";
 
-const subscription = new JetstreamSubscription({
-	url: [
-		"wss://jetstream1.us-east.bsky.network",
-		"wss://jetstream2.us-east.bsky.network",
-	],
-    wantedCollections: [
+const subscription = subscribeEvents({
+	service: "wss://jetstream.us-east.bsky.network",
+    collections: [
         "app.bsky.feed.post",
         "app.bsky.feed.repost"
     ],
-    cursor: pipe(getConfig(CURSOR_KEY), parseInt),
+    cursor: {
+		load() {
+			return pipe(getConfig(CURSOR_KEY), Number);
+		},
+		save(seq) {
+			setConfig(CURSOR_KEY, String(seq));
+            console.log(`committed cursor ${seq}`)
+		},
+	}
 });
-
-setInterval(() => {
-	setConfig(CURSOR_KEY, String(subscription.cursor));
-    console.log(`committed cursor ${subscription.cursor}`);
-}, 5_000);
 
 const maxPostsPerFeed = pipe(getConfig("maxPostsPerFeed"), parseInt);
 if (maxPostsPerFeed !== undefined) {
@@ -68,20 +68,23 @@ const ingestDelete = db.prepare(`DELETE FROM posts WHERE aturi = ?`);
 
 console.log("ready to consume");
 for await (const event of subscription) {
-	if (event.kind === "commit" && event.commit.operation === "create") {
-        const record = event.commit.record;
-        const aturi = `at://${event.did}/${event.commit.collection}/${event.commit.rkey}`;
-        switch (event.commit.collection) {
+	if (event.$type !== 'network.bsky.jetstream.subscribeEvents#commit') continue;
+
+	if (event.operation === "create") {
+        const record = event.record;
+        const aturi = `at://${event.did}/${event.collection}/${event.rkey}`;
+        const time = Temporal.Instant.from("2024-09-09T19:46:02.329308Z").epochNanoseconds/1000n;
+        switch (event.collection) {
             case "app.bsky.feed.post":
                 if (!is(AppBskyFeedPost.mainSchema, record)) {
                     console.log(`ignoring invalid record ${aturi}`);
                     break;
                 }
                 if (record.reply === undefined) {
-                    ingestPost.run(aturi, event.time_us, event.did);
+                    ingestPost.run(aturi, time, event.did);
                 } else {
-                    ingestReplier.run(aturi, event.time_us, event.did);
-                    ingestRepliee.run(aturi, event.time_us, didFromAturi(record.reply.parent.uri));
+                    ingestReplier.run(aturi, time, event.did);
+                    ingestRepliee.run(aturi, time, didFromAturi(record.reply.parent.uri));
                 }
                 break;
 
@@ -90,10 +93,10 @@ for await (const event of subscription) {
                     console.log(`ignoring invalid record ${aturi}`);
                     break;
                 }
-                ingestRepost.run(aturi, record.subject.uri, event.time_us, event.did);
+                ingestRepost.run(aturi, record.subject.uri, time, event.did);
                 break;
         }
-    } else if (event.kind === "commit" && event.commit.operation === "delete") {
-        ingestDelete.run(`at://${event.did}/${event.commit.collection}/${event.commit.rkey}`);
+    } else if (event.operation === "delete") {
+        ingestDelete.run(`at://${event.did}/${event.collection}/${event.rkey}`);
     }
 }
